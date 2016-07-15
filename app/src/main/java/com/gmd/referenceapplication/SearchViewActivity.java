@@ -41,7 +41,7 @@ public class SearchViewActivity extends AppCompatActivity {
 
 
         MenuItem myActionMenuItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSuggestionsAdapter(cursorAdapter);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -64,17 +64,30 @@ public class SearchViewActivity extends AppCompatActivity {
             }
         });
 
-        searchView.setOnSearchClickListener(new View.OnClickListener() {
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
 
+            @Override
+            public boolean onSuggestionClick(int position) {
+                Cursor cursor = cursorAdapter.getCursor();
+
+                if (cursor != null &&
+                        cursor.moveToPosition(position)) {
+
+                    int quantityIndex = cursor.getColumnIndex(DatabaseTable.COL_QUANTITY);
+                    String quantity = cursor.getString(quantityIndex);
+                    searchView.setQuery(quantity, false);
+                }
+
+                return true;
             }
         });
-
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
+
 
 
         SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
